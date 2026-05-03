@@ -1,0 +1,48 @@
+{
+  "type": "mod",
+  "id": "nox.avatars.finalik",
+  "provides": [],
+  "name": "Avatar FinalIK Backend",
+  "version": "1.0.0",
+  "description": "Registers the FinalIK VRIK backend for avatar IK. Requires the HAS_FINALIK scripting define.",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/nox.avatars.finalik",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/nox.avatars.finalik/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "nox.avatars.modules",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "nox.avatars.rigbuilder",
+      "type": "conflicts",
+      "version": ">=0.0.0"
+    },
+    {
+      "id": "rootmotion.finalik",
+      "type": "requires",
+      "version": ">=1.0.0"
+    }
+  ],
+  "entrypoints": {
+    "main": [
+      "Nox.Avatars.FinalIK.Runtime.Main"
+    ]
+  },
+  "references": [],
+  "permissions": []
+}

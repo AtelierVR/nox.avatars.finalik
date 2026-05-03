@@ -1,0 +1,21 @@
+{
+  "name": "Nox.Avatars.FinalIK.Runtime",
+  "rootNamespace": "",
+  "references": [
+    "Nox.CCK",
+    "Nox.Avatars.Rigging",
+    "Nox.CCK.Avatars.Rigging",
+    "RootMotion"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "HAS_FINALIK"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
