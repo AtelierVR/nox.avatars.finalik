@@ -1,6 +1,6 @@
 #if HAS_FINALIK
-using System.Collections.Generic;
-using UnityEngine;
+using Nox.Avatars;
+using Nox.Avatars.Rigging;
 using Nox.CCK.Avatars.Rigging;
 using Nox.CCK.Utils;
 
@@ -18,19 +18,19 @@ namespace Nox.Avatars.FinalIK {
 
 		/// <inheritdoc/>
 		/// Returns 10 for XR, 5 for Desktop, -1 otherwise.
-		public int CanHandle(Dictionary<string, object> arguments) {
-			var type = RiggingBackendRegistry.GetControllerType(arguments);
-			if (type == RiggingControllerType.XR)      return 10;
-			if (type == RiggingControllerType.Desktop) return 5;
+		public int CanHandle(IRuntimeAvatar runtime) {
+			var args = runtime.Arguments;
+			if (args.TryGetValue(RiggingControllerType.XR,      out var xr)      && xr is true) return 10;
+			if (args.TryGetValue(RiggingControllerType.Desktop, out var desktop) && desktop is true) return 5;
 			return -1;
 		}
 
 		/// <inheritdoc/>
-		public BaseRiggingModule CreateModule(GameObject anchor)
-			=> anchor.GetOrAddComponent<FinalIKAvatarModule>();
+		public IRiggingModule Instantiate(IRuntimeAvatar runtime)
+			=> runtime.Descriptor.Anchor.GetOrAddComponent<FinalIKAvatarModule>();
 
 		/// <inheritdoc/>
-		public void SetupRig(BaseRiggingModule module) {
+		public void SetupRig(IRiggingModule module) {
 			if (module is FinalIKAvatarModule fik)
 				FinalIKRigGenerator.Create(fik);
 		}

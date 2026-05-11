@@ -3,7 +3,9 @@
   "rootNamespace": "",
   "references": [
     "Nox.CCK",
+    "Nox.Avatars",
     "Nox.Avatars.Rigging",
+    "Nox.Avatars.Parameters",
     "Nox.CCK.Avatars.Rigging",
     "RootMotion"
   ],
@@ -16,6 +18,12 @@
   "defineConstraints": [
     "HAS_FINALIK"
   ],
-  "versionDefines": [],
+  "versionDefines": [
+    {
+      "name": "rootmotion.finalik",
+      "expression": "",
+      "define": "HAS_FINALIK"
+    }
+  ],
   "noEngineReferences": false
 }

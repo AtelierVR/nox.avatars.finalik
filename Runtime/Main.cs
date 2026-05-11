@@ -1,5 +1,6 @@
 #if HAS_FINALIK
 using Nox.Avatars.FinalIK;
+using Nox.Avatars.Rigging;
 using Nox.CCK.Avatars.Rigging;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;

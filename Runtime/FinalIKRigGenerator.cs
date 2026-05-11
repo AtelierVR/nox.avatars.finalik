@@ -13,8 +13,8 @@ namespace Nox.Avatars.FinalIK {
 	public static class FinalIKRigGenerator {
 		public static VRIK Create(FinalIKAvatarModule module) {
 			var rig      = module.GetRig();
-			var animator = module.Descriptor.GetAnimator();
-			var anchor   = module.Descriptor.GetAnchor().transform;
+			var animator = module.Descriptor.Animator;
+			var anchor   = module.Descriptor.Anchor.transform;
 
 			if (!animator) {
 				Debug.LogError("Animator not found on avatar root!");
