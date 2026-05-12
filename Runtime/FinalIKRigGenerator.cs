@@ -65,8 +65,9 @@ namespace Nox.Avatars.FinalIK {
 			// Right Leg
 			rig.solver.rightLeg.target   = CreateTarget(module, HumanBodyBones.RightHand);
 			rig.solver.rightLeg.bendGoal = CreateTarget(module, HumanBodyBones.RightLowerArm);
-			// Locomotion
-			rig.solver.locomotion.mode = IKSolverVR.Locomotion.Mode.Animated;
+			// Locomotion - use Procedural mode; Animated requires VRIK_* animator parameters
+			// that user avatars will not have
+			rig.solver.locomotion.mode = IKSolverVR.Locomotion.Mode.Procedural;
 			
 			return rig;
 		}
