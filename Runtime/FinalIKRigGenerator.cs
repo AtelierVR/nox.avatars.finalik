@@ -61,23 +61,52 @@ namespace Nox.Avatars.FinalIK {
 			rig.solver.rightArm.bendGoal = CreateTarget(module, HumanBodyBones.RightUpperArm);
 			// Left Leg
 			rig.solver.leftLeg.target   = CreateTarget(module, HumanBodyBones.LeftFoot);
-			rig.solver.leftLeg.bendGoal = CreateTarget(module, HumanBodyBones.LeftLowerArm);
+			rig.solver.leftLeg.bendGoal = CreateTarget(module, HumanBodyBones.LeftLowerLeg);
 			// Right Leg
-			rig.solver.rightLeg.target   = CreateTarget(module, HumanBodyBones.RightHand);
-			rig.solver.rightLeg.bendGoal = CreateTarget(module, HumanBodyBones.RightLowerArm);
-			// Locomotion - use Procedural mode; Animated requires VRIK_* animator parameters
-			// that user avatars will not have
-			rig.solver.locomotion.mode = IKSolverVR.Locomotion.Mode.Procedural;
+			rig.solver.rightLeg.target   = CreateTarget(module, HumanBodyBones.RightFoot);
+			rig.solver.rightLeg.bendGoal = CreateTarget(module, HumanBodyBones.RightLowerLeg);
+			// Spine - bodyRotStiffness=0 prevents VRIK from transferring head roll/pitch to the
+			// pelvis. In 3-point VR (no pelvis tracker) lateral head tilt should NOT rotate the
+			// hips. Horizontal body rotation is handled by locomotion.maxRootAngle instead.
+			rig.solver.spine.bodyRotStiffness = 0f;
+
+			// Locomotion - Animated mode; weight=1 lets VRIK reposition the root XZ each frame
+			// to follow the head target. Y is corrected manually by the controller's LateUpdate.
+			rig.solver.locomotion.mode                 = IKSolverVR.Locomotion.Mode.Animated;
+			rig.solver.locomotion.weight               = 1f;
+			rig.solver.locomotion.maxRootAngleMoving   = 10f;
+			// limit the rotation of the body by the head
+			rig.solver.locomotion.maxRootAngleStanding = 50f;
+			
+			// force the pelvis yo not break by the height of the head
+			rig.solver.spine.maintainPelvisPosition = 0f;
+			rig.solver.spine.minHeadHeight          = 0f;
+
+			// Allow the avatar to follow the head with high fidelity,
+			// even if the feet are off the ground (e.g. crouching, sitting).
+			// This is important for 3-point VR where the pelvis is not tracked,
+			// and the head is the only reference for root motion.
+			rig.solver.plantFeet = false;
 			
 			return rig;
 		}
 
 		private static Transform CreateTarget(FinalIKAvatarModule module, HumanBodyBones bone) {
 			var transform = new GameObject($"VRIK_{bone.ToString()}").transform;
-			transform.parent        = module.transform;
-			transform.localPosition = Vector3.zero;
-			transform.localRotation = Quaternion.identity;
-			transform.localScale    = Vector3.one;
+			transform.parent     = module.transform;
+			transform.localScale = Vector3.one;
+
+			// Initialize at the actual bone world position (same pattern as RigBuilder's GetOrAddPart).
+			// This prevents VRIK from starting with targets at (0,0,0) and drifting the avatar root.
+			var boneTransform = module.GetBone(bone);
+			if (boneTransform != null) {
+				transform.position = boneTransform.position;
+				transform.rotation = boneTransform.rotation;
+			} else {
+				transform.localPosition = Vector3.zero;
+				transform.localRotation = Quaternion.identity;
+			}
+
 			module.Parts.Add(new RiggingPart(bone.ToPlayerRig().ToIndex(), transform));
 			return transform;
 		}

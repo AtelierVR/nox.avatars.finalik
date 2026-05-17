@@ -17,11 +17,10 @@ namespace Nox.Avatars.FinalIK {
 			=> BACKEND_ID;
 
 		/// <inheritdoc/>
-		/// Returns 10 for XR, 5 for Desktop, -1 otherwise.
+		/// Returns 10 for XR only. Desktop uses RigBuilder (score 0) as fallback.
 		public int CanHandle(IRuntimeAvatar runtime) {
 			var args = runtime.Arguments;
-			if (args.TryGetValue(RiggingControllerType.XR,      out var xr)      && xr is true) return 10;
-			if (args.TryGetValue(RiggingControllerType.Desktop, out var desktop) && desktop is true) return 5;
+			if (args.TryGetValue(RiggingControllerType.XR, out var xr) && xr is true) return 10;
 			return -1;
 		}
 
