@@ -1,5 +1,4 @@
 #if HAS_FINALIK
-using Nox.Avatars;
 using Nox.Avatars.Rigging;
 using Nox.CCK.Avatars.Rigging;
 using Nox.CCK.Utils;
@@ -12,7 +11,7 @@ namespace Nox.Avatars.FinalIK {
 	/// </summary>
 	public class FinalIKBackend : IRiggingBackend {
 		public const string BACKEND_ID = "finalik";
-		
+
 		public string Id
 			=> BACKEND_ID;
 
@@ -20,18 +19,30 @@ namespace Nox.Avatars.FinalIK {
 		/// Returns 10 for XR only. Desktop uses RigBuilder (score 0) as fallback.
 		public int CanHandle(IRuntimeAvatar runtime) {
 			var args = runtime.Arguments;
-			if (args.TryGetValue(RiggingControllerType.XR, out var xr) && xr is true) return 10;
+			if (args.TryGetValue(RiggingControllerType.XR, out var xr) && xr is true)
+				return 10;
 			return -1;
 		}
 
 		/// <inheritdoc/>
-		public IRiggingModule Instantiate(IRuntimeAvatar runtime)
-			=> runtime.Descriptor.Anchor.GetOrAddComponent<FinalIKAvatarModule>();
+		public IRiggingModule Instantiate(IRuntimeAvatar runtime) {
+			var module = runtime.Descriptor.Anchor.GetOrAddComponent<FinalIKAvatarModule>();
 
-		/// <inheritdoc/>
-		public void SetupRig(IRiggingModule module) {
-			if (module is FinalIKAvatarModule fik)
-				FinalIKRigGenerator.Create(fik);
+			if (!module.Before(runtime)) {
+				Logger.LogError("Failed to initialize with the given runtime arguments.", module, nameof(FinalIKBackend));
+				module.enabled = false;
+				return null;
+			}
+
+			FinalIKRigGenerator.Create(module, runtime);
+
+			if (!module.After(runtime)) {
+				Logger.LogError("Failed to finalize setup with the given runtime arguments.", module, nameof(FinalIKBackend));
+				module.enabled = false;
+				return null;
+			}
+
+			return module;
 		}
 
 		/// <inheritdoc/>

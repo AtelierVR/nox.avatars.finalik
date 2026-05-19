@@ -11,7 +11,7 @@ namespace Nox.Avatars.FinalIK {
 	/// Générateur pour les systèmes IK utilisant FinalIK VR (préféré quand disponible)
 	/// </summary>
 	public static class FinalIKRigGenerator {
-		public static VRIK Create(FinalIKAvatarModule module) {
+		public static VRIK Create(FinalIKAvatarModule module, IRuntimeAvatar runtime) {
 			var rig      = module.GetRig();
 			var animator = module.Descriptor.Animator;
 			var anchor   = module.Descriptor.Anchor.transform;
@@ -72,12 +72,12 @@ namespace Nox.Avatars.FinalIK {
 
 			// Locomotion - Animated mode; weight=1 lets VRIK reposition the root XZ each frame
 			// to follow the head target. Y is corrected manually by the controller's LateUpdate.
-			rig.solver.locomotion.mode                 = IKSolverVR.Locomotion.Mode.Animated;
-			rig.solver.locomotion.weight               = 1f;
-			rig.solver.locomotion.maxRootAngleMoving   = 10f;
+			rig.solver.locomotion.mode               = IKSolverVR.Locomotion.Mode.Animated;
+			rig.solver.locomotion.weight             = 1f;
+			rig.solver.locomotion.maxRootAngleMoving = 10f;
 			// limit the rotation of the body by the head
 			rig.solver.locomotion.maxRootAngleStanding = 50f;
-			
+
 			// force the pelvis yo not break by the height of the head
 			rig.solver.spine.maintainPelvisPosition = 0f;
 			rig.solver.spine.minHeadHeight          = 0f;
@@ -87,7 +87,13 @@ namespace Nox.Avatars.FinalIK {
 			// This is important for 3-point VR where the pelvis is not tracked,
 			// and the head is the only reference for root motion.
 			rig.solver.plantFeet = false;
-			
+
+			// Escape the animation head.
+			rig.solver.spine.bodyPosStiffness = 1f;
+			rig.solver.spine.bodyRotStiffness = 0f;
+			rig.solver.spine.neckStiffness    = 0f;
+
+
 			return rig;
 		}
 
