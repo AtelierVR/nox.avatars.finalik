@@ -1,5 +1,6 @@
 {
   "name": "nox.avatars.finalik",
   "displayName": "Nox - Avatar FinalIK Backend",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "description": "FinalIK VRIK backend for avatar inverse kinematics. Requires HAS_FINALIK scripting define."
 }
