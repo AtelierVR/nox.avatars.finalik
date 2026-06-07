@@ -33,8 +33,10 @@
       "version": ">=0.0.0"
     },
     {
-      "id": "rootmotion.finalik", "register": "upm:2.0.0",`n      "type": "requires",`n      "register": "upm:2.0.0",
-      "version": ">=1.0.0"
+      "id": "rootmotion.finalik",
+      "type": "requires",
+      "version": ">=1.0.0",
+      "register": "upm+:rootmotion.finalik@2.0.0"
     }
   ],
   "entrypoints": {
