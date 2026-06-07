@@ -36,7 +36,7 @@
       "id": "rootmotion.finalik",
       "type": "requires",
       "version": ">=1.0.0",
-      "register": "upm+rootmotion.finalik@2.0.0"
+      "register": "git+https://github.com/AtelierVR/nox.finalik.git"
     }
   ],
   "entrypoints": {
