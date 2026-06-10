@@ -1,7 +1,6 @@
 {
   "type": "mod",
   "id": "nox.avatars.finalik",
-  "provides": [],
   "name": "Avatar FinalIK Backend",
   "version": "1.0.0",
   "description": "Registers the FinalIK VRIK backend for avatar IK. Requires the HAS_FINALIK scripting define.",
@@ -20,7 +19,6 @@
       "website": "https://hactazia.fr/"
     }
   ],
-  "contributors": [],
   "relations": [
     {
       "id": "nox.avatars.modules",
@@ -43,7 +41,5 @@
     "main": [
       "Nox.Avatars.FinalIK.Runtime.Main"
     ]
-  },
-  "references": [],
-  "permissions": []
+  }
 }
