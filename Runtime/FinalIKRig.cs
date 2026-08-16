@@ -6,14 +6,14 @@ using UnityEngine;
 using static Nox.Avatars.FinalIK.VRIKWeightParameter;
 
 namespace Nox.Avatars.FinalIK {
-	public class FinalIKAvatarModule : BaseRiggingModule {
+	public class FinalIKRig : BaseRigging {
 		private VRIK _rig;
 
 		public VRIK GetRig()
 			=> _rig ??= Descriptor.Anchor?.GetOrAddComponent<VRIK>();
 
-		public override bool SetupParameters(BaseRiggingModule m) {
-			if (m is not FinalIKAvatarModule module)
+		public override bool SetupParameters(BaseRigging m) {
+			if (m is not FinalIKRig module)
 				return false;
 
 			var rig = module.GetRig();

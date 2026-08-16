@@ -11,7 +11,7 @@ namespace Nox.Avatars.FinalIK {
 	/// Générateur pour les systèmes IK utilisant FinalIK VR (préféré quand disponible)
 	/// </summary>
 	public static class FinalIKRigGenerator {
-		public static VRIK Create(FinalIKAvatarModule module, IRuntimeAvatar runtime) {
+		public static VRIK Create(FinalIKRig module, IRuntimeAvatar runtime) {
 			var rig      = module.GetRig();
 			var animator = module.Descriptor.Animator;
 			var anchor   = module.Descriptor.Anchor.transform;
@@ -97,9 +97,9 @@ namespace Nox.Avatars.FinalIK {
 			return rig;
 		}
 
-		private static Transform CreateTarget(FinalIKAvatarModule module, HumanBodyBones bone) {
+		private static Transform CreateTarget(FinalIKRig module, HumanBodyBones bone) {
 			var transform = new GameObject($"VRIK_{bone.ToString()}").transform;
-			transform.parent     = module.transform;
+			transform.parent     = module.Descriptor.Anchor.transform;
 			transform.localScale = Vector3.one;
 
 			// Initialize at the actual bone world position (same pattern as RigBuilder's GetOrAddPart).

@@ -25,24 +25,26 @@ namespace Nox.Avatars.FinalIK {
 		}
 
 		/// <inheritdoc/>
-		public IRiggingModule Instantiate(IRuntimeAvatar runtime) {
-			var module = runtime.Descriptor.Anchor.GetOrAddComponent<FinalIKAvatarModule>();
+		public IRigging Create(IRuntimeAvatar runtime) {
+			var rig = new FinalIKRig {
+				Id = BACKEND_ID
+			};
 
-			if (!module.Before(runtime)) {
-				Logger.LogError("Failed to initialize with the given runtime arguments.", module, nameof(FinalIKBackend));
-				module.enabled = false;
+			if (!rig.Before(runtime)) {
+				Logger.LogError("Failed to initialize with the given runtime arguments.", null, nameof(FinalIKBackend));
+				rig.Dispose();
 				return null;
 			}
 
-			FinalIKRigGenerator.Create(module, runtime);
+			FinalIKRigGenerator.Create(rig, runtime);
 
-			if (!module.After(runtime)) {
-				Logger.LogError("Failed to finalize setup with the given runtime arguments.", module, nameof(FinalIKBackend));
-				module.enabled = false;
+			if (!rig.After(runtime)) {
+				Logger.LogError("Failed to finalize setup with the given runtime arguments.", null, nameof(FinalIKBackend));
+				rig.Dispose();
 				return null;
 			}
 
-			return module;
+			return rig;
 		}
 
 		/// <inheritdoc/>
