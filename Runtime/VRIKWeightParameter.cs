@@ -30,7 +30,7 @@ namespace Nox.Avatars.FinalIK {
 
 		public string GetName() => _name;
 		public bool   IsValid() => _rig;
-		public int    GetKey()  => _name.GetHashCode();
+		public int    GetKey()  => GetName().Hash();
 
 		public ParameterType  GetValueType() => ParameterType.Float;
 		public ParameterFlags GetFlags()     => ParameterFlags.OwnerEditable | ParameterFlags.OwnerSyncsToViewers;
