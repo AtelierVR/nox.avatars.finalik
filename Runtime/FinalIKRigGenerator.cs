@@ -93,6 +93,16 @@ namespace Nox.Avatars.FinalIK {
 			rig.solver.spine.bodyRotStiffness = 0f;
 			rig.solver.spine.neckStiffness    = 0f;
 
+			// IMPORTANT (FinalIK gotcha): `headClampWeight` does NOT lock the head on its target, it
+			// means exactly the opposite — the share of rotation FORBIDDEN to it. It feeds
+			// `QuaTools.ClampRotation`, which starts with
+			//     if (clampWeight >= 1f) return Quaternion.identity;
+			// so at 1 the correction `r` of `IKSolverVRSpine.Bend()` becomes the identity: the head
+			// stops following its target in rotation and keeps the animation (the 0.6 default only
+			// clamps beyond a 72° gap, which conversely lets the rotation through).
+			// 0 = no clamp, the head sticks exactly to the target rotation.
+			rig.solver.spine.headClampWeight = 0f;
+
 
 			return rig;
 		}
