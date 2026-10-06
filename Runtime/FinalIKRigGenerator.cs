@@ -26,7 +26,15 @@ namespace Nox.Avatars.FinalIK {
 			// Spine
 			rig.references.pelvis = module.GetBone(HumanBodyBones.Hips);
 			rig.references.spine  = module.GetBone(HumanBodyBones.Spine);
-			rig.references.head   = module.GetBone(HumanBodyBones.Head);
+			// ⚠️ chest/neck sont optionnels pour VRIK, mais s'ils sont vides `hasChest`/`hasNeck` (dérivés de
+			// `references.GetTransforms()[3]/[4]`) sont faux : la chaîne du spine se réduit à
+			// [pelvis, spine, head] et `SolvePelvis()` prend la branche `!hasChest && !hasNeck`
+			// (`SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, …)`), qui *fait tourner le
+			// pelvis* après `TranslatePelvis` — la rotation du tracker de bassin était donc écrasée à chaque
+			// frame. Les indices de torse/cou décalent aussi l'ancrage des bras (`hasChest ? 3 : 2`).
+			rig.references.chest = module.GetBone(HumanBodyBones.Chest);
+			rig.references.neck  = module.GetBone(HumanBodyBones.Neck);
+			rig.references.head  = module.GetBone(HumanBodyBones.Head);
 			// Left Arm
 			rig.references.leftShoulder = module.GetBone(HumanBodyBones.LeftShoulder);
 			rig.references.leftUpperArm = module.GetBone(HumanBodyBones.LeftUpperArm);
