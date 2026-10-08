@@ -13,21 +13,24 @@ namespace Nox.Avatars.FinalIK {
 		private float? _rootAngleStanding;
 		private float? _rootAngleMoving;
 
-		/// <summary>Le bassin est piloté par un tracker.</summary>
+		/// <summary>The hips are driven by a tracker.</summary>
 		private bool _hipsTracked;
 
-		/// <summary>Le jeu pilote la racine (calibration full-body) — voir <see cref="SetExternalRootControl"/>.</summary>
+		/// <summary>The game drives the root (full-body calibration), see <see cref="SetExternalRootControl"/>.</summary>
 		private bool _externalRootControl;
 
-		/// <summary>Locomotion / angle de racine mis de côté tant que le rig ne doit pas déplacer la racine.</summary>
+		/// <summary>Locomotion and root angle set aside while the rig must not move the root.</summary>
 		private float? _savedLocomotionWeight;
 		private float? _savedMaxRootAngle;
 
-		/// <summary>Contrôleur de racine (bassin) installé quand un tracker de bassin prend la main.</summary>
+		/// <summary>Root (hips) controller installed once a hips tracker takes over.</summary>
 		private VRIKRootController _rootController;
 
-		public VRIK GetRig()
-			=> _rig ??= Descriptor.Anchor?.GetOrAddComponent<VRIK>();
+		public VRIK GetRig() {
+			_rig ??= Descriptor.Anchor?.GetOrAddComponent<VRIK>();
+			FinalIKLegBendPlane.Pin(_rig);
+			return _rig;
+		}
 
 		public override bool SetupParameters(BaseRigging m) {
 			if (m is not FinalIKRig module)
@@ -99,8 +102,7 @@ namespace Nox.Avatars.FinalIK {
 					rig.solver.rightArm.rotationWeight = w;
 					break;
 				case HumanBodyBones.LeftFoot:
-					// Le solveur de jambe applique le *cap* de la cible (§ VRIKCalibrator) : le driver envoie un
-					// cap pur, on garde donc la rotation active pour que le pied suive le tracker.
+					// The leg solver applies the yaw of the target, so the rotation stays active.
 					rig.solver.leftLeg.positionWeight  = w;
 					rig.solver.leftLeg.rotationWeight  = w;
 					break;
@@ -112,9 +114,7 @@ namespace Nox.Avatars.FinalIK {
 		}
 
 		/// <summary>
-		/// Le contrôleur (XR) prend la main sur la racine de l'avatar : voir
-		/// <see cref="IRigging.SetExternalRootControl"/>. Utilisé pendant la calibration full-body, où le jeu pose
-		/// la racine (cap = tête, XZ = tête ou espace de jeu).
+		/// The (XR) controller takes over the avatar root: see <see cref="IRigging.SetExternalRootControl"/>.
 		/// </summary>
 		public override void SetExternalRootControl(bool external) {
 			if (_externalRootControl == external)
@@ -125,17 +125,9 @@ namespace Nox.Avatars.FinalIK {
 		}
 
 		/// <summary>
-		/// Recalcule qui pilote la racine. Dès que le rig ne doit PAS la déplacer (bassin tracké ou racine pilotée
-		/// par le jeu) :
-		/// <list type="bullet">
-		/// <item>la locomotion VRIK est coupée — sinon elle déplace l'avatar d'après la tête (les pieds « glissent »
-		/// quand on penche la tête) ;</item>
-		/// <item>`spine.maxRootAngle` est forcé à 180 — sinon `IKSolverVRSpine.Solve` active son rattrapage d'angle
-		/// de racine, qui tourne <b>et translate</b> la racine autour du pivot de l'Animator (`(0,0,0)` chez nos
-		/// avatars) : l'avatar se téléporte à chaque frame (il se réactive quand la locomotion recopie
-		/// `maxRootAngleStanding/Moving`).</item>
-		/// </list>
-		/// Le <see cref="VRIKRootController"/> (racine = bassin) n'est actif que pour un bassin tracké hors
+		/// Recomputes who drives the root. While the rig must not move it (tracked hips or a game-driven root),
+		/// the VRIK locomotion is cut and <c>spine.maxRootAngle</c> is forced to 180 so the spine does not move
+		/// the root itself. The <see cref="VRIKRootController"/> is only active for tracked hips outside a
 		/// calibration.
 		/// </summary>
 		private void RefreshRootControl() {
@@ -165,10 +157,8 @@ namespace Nox.Avatars.FinalIK {
 		}
 
 		/// <summary>
-		/// Installe (ou réactive) le <see cref="VRIKRootController"/> de l'ancre : il déplace la racine de
-		/// l'avatar sur le bassin tracké (XZ + cap) en remplacement de la locomotion « tête » de VRIK, et
-		/// pousse le bone pelvis vers sa cible avant chaque solve (position <c>pelvisPositionWeight</c>,
-		/// rotation <c>pelvisRotationWeight</c>) — c'est ce qui donne le suivi strict du bassin.
+		/// Installs (or enables) the anchor's <see cref="VRIKRootController"/>: it moves the avatar root onto the
+		/// tracked hips (XZ + yaw) and pushes the pelvis bone towards its target before each solve.
 		/// </summary>
 		private VRIKRootController EnableRootController() {
 			var anchor = Descriptor?.Anchor;
@@ -178,8 +168,7 @@ namespace Nox.Avatars.FinalIK {
 			var controller = anchor.GetOrAddComponent<VRIKRootController>();
 			controller.enabled = _hipsTracked && !_externalRootControl;
 
-			// Re-fixe l'axe « droite » du bassin (le yaw de la racine en découle) sur la pose courante, qui
-			// est celle juste après la calibration : le tracker et l'avatar sont alors cohérents.
+			// Re-pins the pelvis "right" axis (the root yaw follows from it) on the current pose.
 			controller.Calibrate();
 
 			return controller;

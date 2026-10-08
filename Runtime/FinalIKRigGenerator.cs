@@ -26,12 +26,9 @@ namespace Nox.Avatars.FinalIK {
 			// Spine
 			rig.references.pelvis = module.GetBone(HumanBodyBones.Hips);
 			rig.references.spine  = module.GetBone(HumanBodyBones.Spine);
-			// ⚠️ chest/neck sont optionnels pour VRIK, mais s'ils sont vides `hasChest`/`hasNeck` (dérivés de
-			// `references.GetTransforms()[3]/[4]`) sont faux : la chaîne du spine se réduit à
-			// [pelvis, spine, head] et `SolvePelvis()` prend la branche `!hasChest && !hasNeck`
-			// (`SolveTrigonometric(bones, pelvisIndex, spineIndex, headIndex, …)`), qui *fait tourner le
-			// pelvis* après `TranslatePelvis` — la rotation du tracker de bassin était donc écrasée à chaque
-			// frame. Les indices de torse/cou décalent aussi l'ancrage des bras (`hasChest ? 3 : 2`).
+			// chest/neck are optional for VRIK, but leaving them empty makes hasChest/hasNeck false: the spine
+			// chain then reduces to [pelvis, spine, head] and SolvePelvis() takes the branch that rotates the
+			// pelvis, which overrides the hips tracker rotation.
 			rig.references.chest = module.GetBone(HumanBodyBones.Chest);
 			rig.references.neck  = module.GetBone(HumanBodyBones.Neck);
 			rig.references.head  = module.GetBone(HumanBodyBones.Head);
@@ -73,6 +70,18 @@ namespace Nox.Avatars.FinalIK {
 			// Right Leg
 			rig.solver.rightLeg.target   = CreateTarget(module, HumanBodyBones.RightFoot);
 			rig.solver.rightLeg.bendGoal = CreateTarget(module, HumanBodyBones.RightLowerLeg);
+
+			// The knee bend plane must NOT come from the pose the solver reads at init. The rig is created while
+			// the avatar is still on its rest/T-pose, so `IKSolverVR.Read` captures a degenerate normal (measured
+			// +/-0.023 on X) and the two sides of the default 0.5 slerp cancel each other: the knee direction is
+			// then resolved out of whatever pose each client happens to animate, which is not the same on the
+			// owner and on a viewer ("the knee does not follow the avatar"). Pinning the plane to the foot
+			// target lateral axis makes the bend a pure function of the target rotation, which is transmitted
+			// (validated on a live rig: the knee bulges forward, same value on both legs).
+			rig.solver.leftLeg.bendNormalRelToTarget  = Vector3.left;
+			rig.solver.rightLeg.bendNormalRelToTarget = Vector3.left;
+			rig.solver.leftLeg.bendToTargetWeight      = 1f;
+			rig.solver.rightLeg.bendToTargetWeight     = 1f;
 			// Spine - bodyRotStiffness=0 prevents VRIK from transferring head roll/pitch to the
 			// pelvis. In 3-point VR (no pelvis tracker) lateral head tilt should NOT rotate the
 			// hips. Horizontal body rotation is handled by locomotion.maxRootAngle instead.
@@ -101,16 +110,15 @@ namespace Nox.Avatars.FinalIK {
 			rig.solver.spine.bodyRotStiffness = 0f;
 			rig.solver.spine.neckStiffness    = 0f;
 
-			// IMPORTANT (FinalIK gotcha): `headClampWeight` does NOT lock the head on its target, it
-			// means exactly the opposite — the share of rotation FORBIDDEN to it. It feeds
-			// `QuaTools.ClampRotation`, which starts with
-			//     if (clampWeight >= 1f) return Quaternion.identity;
-			// so at 1 the correction `r` of `IKSolverVRSpine.Bend()` becomes the identity: the head
-			// stops following its target in rotation and keeps the animation (the 0.6 default only
-			// clamps beyond a 72° gap, which conversely lets the rotation through).
-			// 0 = no clamp, the head sticks exactly to the target rotation.
+			// FinalIK gotcha: headClampWeight is the share of rotation FORBIDDEN to the head, so 1 locks it to
+			// the animation and 0 makes it stick to its target.
 			rig.solver.spine.headClampWeight = 0f;
 
+
+			// The values below are only a starting point: `IKSolverVR.Leg.OnRead` overwrites the bend plane when
+			// the solver initiates, with an axis captured from whatever pose is current then. `FinalIKLegBendPlane`
+			// locks it to the pelvis every frame instead, so every client bends the knee the same way.
+			rig.gameObject.GetOrAddComponent<FinalIKLegBendPlane>().Initialize(rig);
 
 			return rig;
 		}
