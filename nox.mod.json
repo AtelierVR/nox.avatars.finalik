@@ -33,7 +33,7 @@
     },
     {
       "id": "rootmotion.finalik",
-      "type": "requires",
+      "type": "depends",
       "version": ">=1.0.0",
       "register": "git+https://github.com/AtelierVR/nox.finalik.git"
     }
